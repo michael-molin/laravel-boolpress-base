@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Post;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
@@ -18,11 +20,16 @@ class PostController extends Controller
         return view('posts.index' , compact('posts'));
     }
 
-    public function published()
-    {
-        $posts = Post::where('published', '1')->get();
-        return view('posts.published' , compact('posts'));
-    }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+     public function published()
+     {
+         $posts = Post::where('published', '1')->get();
+         return view('posts.published' , compact('posts'));
+     }
 
     /**
      * Show the form for creating a new resource.
@@ -31,7 +38,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        return view('posts.create');
     }
 
     /**
@@ -42,7 +49,21 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->all();
+        $data['slug'] = Str::slug($data['title'] , '-');
+        // $slug = Str::slug('Laravel 5 Framework', '-');
+
+        $validator = Validator::make($data , [
+            'title' => 'required|unique|string|max:100',
+            'body' => 'required',
+            'author' => 'required|string|max:50'
+        ]);
+
+        $post = new Post;
+        $post->fill($data);
+        $post->save();
+
+        return redirect()-> route('posts.show', $post->id);
     }
 
     /**
@@ -53,7 +74,9 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        //
+        $post= Post::find($id);
+        // $post = Post::where('slug', $slug)->first();
+        return view('posts.show', compact('post'));
     }
 
     /**
