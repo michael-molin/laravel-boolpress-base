@@ -68,7 +68,7 @@ class PostController extends Controller
         $post = new Post;
         $post->fill($data);
         $post->save();
-
+        dd($post);
         return redirect()-> route('posts.show', $post->id);
     }
 
@@ -81,7 +81,6 @@ class PostController extends Controller
     public function show($id)
     {
         $post= Post::find($id);
-        // $post = Post::where('slug', $slug)->first();
         return view('posts.show', compact('post'));
     }
 
@@ -109,34 +108,44 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // $post = Post::find($id);
-        // if(empty($post)) {
-        //     abort('404');
-        // }
+        $post = Post::find($id);
+        if(empty($post)) {
+            abort('404');
+        }
 
         $data = $request->all();
-        // $data['slug'] = Str::slug($data['title'] , '-');
-        // $validator = Validator::make($data , [
-        //     'title' => 'required|unique:posts|string|max:100',
-        //     'body' => 'required',
-        //     'author' => 'required|string|max:50'
-        // ]);
-        //
-        // if ($validator->fails()) {
-        //     return redirect()->route('posts.edit')
-        //         ->withErrors($validator)
-        //         ->withInput();
-        // }
+        $data['slug'] = Str::slug($data['title'] , '-');
+        $validator = Validator::make($data , [
+            'title' => 'required|unique:posts|string|max:100',
+            'body' => 'required',
+            'author' => 'required|string|max:50'
+        ]);
 
-        $post = new Post;
+        if ($validator->fails()) {
+            return redirect()->route('posts.edit')
+                ->withErrors($validator)
+                ->withInput();
+        }
+        
         $post->fill($data);
         $updated = $post->update();
         if (!$updated) {
             dd('errore aggiornamento');
         }
 
-        return redirect()-> route('posts.show', $id);
+        return redirect()-> route('posts.show', $post->id);
     }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+
+
+
 
     /**
      * Remove the specified resource from storage.
