@@ -62,14 +62,13 @@ class PostController extends Controller
         if ($validator->fails()) {
             return redirect()->route('posts.create')
                 ->withErrors($validator)
-                ->withInput();
+                ->withInput()->with('status', 'Errore');
         }
 
         $post = new Post;
         $post->fill($data);
         $post->save();
-        dd($post);
-        return redirect()-> route('posts.show', $post->id);
+        return redirect()-> route('posts.show', $post->id)->with('status','Post title: '. $post->title . ' salvato con successo' );
     }
 
     /**
@@ -96,7 +95,9 @@ class PostController extends Controller
             abort('404');
         }
 
-        return view('posts.edit', compact('post'));
+        $title = $post->title . ' modificato con successo';
+
+        return view('posts.edit', compact('post', 'title'));
     }
 
     /**
@@ -122,11 +123,11 @@ class PostController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('posts.edit')
+            return redirect()->route('posts.create')
                 ->withErrors($validator)
-                ->withInput();
+                ->withInput()->with('status', 'Errore');
         }
-        
+
         $post->fill($data);
         $updated = $post->update();
         if (!$updated) {
